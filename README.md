@@ -67,49 +67,49 @@ If $$|z(q)| > 1.96$$, we reject the RW hypothesis for that $$q$$ at the 5% level
 ## 3) Methodology and Results
 
 ### 3.1 Adjusted Price Series
-![Adjusted Price](path/to/adjusted_price.png)  
+![Adjusted Price](a.png)  
 The adjusted price series for MSFT from 1988 to 2017 shows a long-term upward trend and non-stationary behavior, typical for asset prices. A RW allows for such trends, but the predictability lies in returns, not prices.
 
 ---
 
 ### 3.2 Daily Log-Returns
-![Daily Returns](path/to/daily_returns.png)  
+![Daily Returns](b.png)  
 Daily log-returns appear stationary (no clear trend) and centered around zero, but volatility clustering is visible — periods of high volatility are grouped together. This is common in financial time series.
 
 ---
 
 ### 3.3 Comparison to White Noise
-![White Noise](path/to/white_noise.png)  
+![White Noise](c.png)  
 A simulated white noise process with the same volatility as MSFT is plotted for comparison. White noise has constant variance and no clustering. Visual differences highlight volatility clustering in real returns.
 
 ---
 
 ### 3.4 Distribution of Returns
-![Histogram](path/to/histogram.png)  
+![Histogram](d.png)  
 The histogram of returns is roughly bell-shaped but with heavier tails than a normal distribution, indicating higher probability of extreme returns compared to a Gaussian RW.
 
 ---
 
 ### 3.5 Variance vs Horizon $$q$$
-![Variance vs q](path/to/variance_vs_q.png)  
+![Variance vs q](e.png)  
 For a RW, the variance of $$q$$-day returns should increase proportionally with $$q$$. MSFT shows approximate linearity, supporting the RW property, though small deviations appear at larger $$q$$.
 
 ---
 
 ### 3.6 Variance Ratio z-statistics
-![VR z-stats](path/to/vr_zstats.png)  
+![VR z-stats](f.png)  
 The VR test compares $$VR(q)$$ to 1. Most z-statistics lie within the ±1.96 band, meaning the RW hypothesis is not rejected for most horizons. A few horizons exceed this threshold, indicating mild autocorrelation.
 
 ---
 
 ### 3.7 Volatility Scaling (MSFT)
-![Vol Scaling MSFT](path/to/vol_scaling_msft.png)  
+![Vol Scaling MSFT](g.png)  
 Annualized volatility of $$q$$-day returns is scaled by $$\sqrt{q}$$. Under RW, this should be flat across $$q$$. The MSFT plot is mostly flat, confirming the scaling law, with minor deviations at larger horizons.
 
 ---
 
 ### 3.8 Volatility Scaling (Monte Carlo Benchmark)
-![Vol Scaling MC](path/to/vol_scaling_mc.png)  
+![Vol Scaling MC](h.png)  
 In a simulated RW with IID Gaussian returns, volatility scaling is perfectly flat, as theory predicts. This serves as a reference: deviations in the MSFT plot reflect real-world effects, not calculation errors.
 
 ---
