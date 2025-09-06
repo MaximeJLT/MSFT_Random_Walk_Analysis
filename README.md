@@ -1,134 +1,122 @@
-# Random Walk Analysis of MSFT (1988–2017)
+# Quantitative Analysis of MSFT
 
 ## 1) Objective
-The aim of this analysis is to determine whether Microsoft’s daily **adjusted prices** (1988–2017) are consistent with a **Random Walk** (RW) process.
+The aim of this analysis is to determine whether Microsoft’s daily **adjusted prices** (1988–2017) behave like a **Random Walk** (RW), and to explore if **time series models** (AR and MA) can describe the return dynamics.
 
 In a RW, **log-returns** behave like independent, unpredictable shocks. Past information should not help predict future returns, which aligns with the **Weak-Form Efficient Market Hypothesis**.
 
-**Research question:** Are MSFT daily log-returns independent and uncorrelated, so that the scaling of variance and volatility with time matches RW theory?
+**Research question:** Are MSFT daily log-returns independent and uncorrelated, or do AR/MA structures exist that can partially explain short-term predictability?
 
 ---
 
-## 2) Theoretical background
+## 2) Theoretical Background
 
 ### 2.1 Random Walk in log-prices
 Adjusted prices are modeled as:
 
-
-$$\log P_t = \log P_{t-1} + r_t$$
-
+$$
+\log P_t = \log P_{t-1} + r_t
+$$
 
 where:
-- $$P_t$$ = adjusted closing price at time $$t$$
-- $$r_t$$ = daily **logarithmic return**:
+- ($$P_t$$) = adjusted closing price at time \(t\)  
+- ($$r_t$$) = daily **logarithmic return**:
 
 $$
 r_t = \log P_t - \log P_{t-1}
 $$
 
----
+### 2.2 Expected Properties under a Random Walk
 
-### 2.2 Expected properties under a Random Walk
-If $$r_t$$ are independent and identically distributed (IID):
+See: `MSFTRW.R`.
 
-1. **Variance grows linearly with the horizon $$q$$**:
+If ($$r_t$$) are independent and identically distributed (IID):
 
-$$\mathrm{Var}(r^{(q)}) = q \cdot \mathrm{Var}(r^{(1)})$$
+1. **Variance grows linearly with the horizon \(q\)**:
 
+$$
+\mathrm{Var}(r^{(q)}) = q \cdot \mathrm{Var}(r^{(1)})
+$$
 
 2. **Volatility scales with the square root of time**:
 
-$$\sigma(q) \approx \frac{\sigma(1)}{\sqrt{q}}$$
-
+$$
+\sigma(q) \approx \sigma(1) \cdot \sqrt{q}
+$$
 
 3. **Variance Ratio**:
 
-$$VR(q) = \frac{\mathrm{Var}(r^{(q)})}{q \cdot \mathrm{Var}(r^{(1)})}$$
+$$
+VR(q) = \frac{\mathrm{Var}(r^{(q)})}{q \cdot \mathrm{Var}(r^{(1)})}
+$$
 
-Under RW: $$VR(q) = 1$$ for all $$q$$.
-
----
+Under RW: \(VR(q) = 1\) for all \(q\).
 
 ### 2.3 Lo & MacKinlay Variance Ratio Test
 Lo & MacKinlay (1988) developed the VR test to evaluate:
 
-- **Null hypothesis** $$H_0$$: $$VR(q) = 1$$ (Random Walk)
-- **Alternative**: $$VR(q) \neq 1$$ (autocorrelation present)
+- **Null hypothesis** ($$H_0$$): ($$VR(q) = 1$$) (Random Walk)  
+- **Alternative**: ($$VR(q) \neq 1$$) (autocorrelation present)  
 
 Test statistic:
 
-$$z(q) = \frac{VR(q) - 1}{\mathrm{StdError}(VR(q))}$$
+$$
+z(q) = \frac{VR(q) - 1}{\mathrm{StdError}(VR(q))}
+$$
 
-
-If $$|z(q)| > 1.96$$, we reject the RW hypothesis for that $$q$$ at the 5% level.
-
----
-
-## 3) Methodology and Results
-
-### 3.1 Adjusted Price Series
-![Adjusted Price](a.png)  
-The adjusted price series for MSFT from 1988 to 2017 shows a long-term upward trend and non-stationary behavior, typical for asset prices. A RW allows for such trends, but the predictability lies in returns, not prices.
+If ($$|z(q)| > 1.96$$), we reject the RW hypothesis at the 5% level.
 
 ---
 
-### 3.2 Daily Log-Returns
-![Daily Returns](b.png)  
-Daily log-returns appear stationary (no clear trend) and centered around zero, but volatility clustering is visible — periods of high volatility are grouped together. This is common in financial time series.
+## 3) Methodology: Time Series Simulations and Analysis
+
+See: `simulate_AR_MA_MSFT.R`.
+
+To complement the empirical analysis, we simulate **AR(2)** and **MA(2)** processes, and generate **white noise**, to compare with MSFT returns.  
+
+## 3.2 Explanation of the Code
+
+- **AR(2) simulation**: Each value depends on the previous two values plus Gaussian noise:
+
+$$
+r_t = \phi_0 + \phi_1 r_{t-1} + \phi_2 r_{t-2} + \varepsilon_t
+$$
+
+- **MA(2) simulation**: Each value depends on the current and previous two noise terms:
+
+$$
+r_t = \varepsilon_t + \theta_1 \varepsilon_{t-1} + \theta_2 \varepsilon_{t-2}
+$$
+
+- **White noise**: Purely random series with the same standard deviation as AR(2). No correlation across time.
+
+- **Microsoft data**: Downloaded using `tidyquant`. Log-returns are calculated as:
+
+$$
+r_t = \log(P_t / P_{t-1})
+$$
+
+- **ACF / PACF plots**:
+  - **ACF**: correlation between ($$r_t$$) and ($$r_{t-k}$$) for lag ($$k$$)  
+  - **PACF**: correlation of ($$r_t$$) with ($$r_{t-k}$$) after removing the effect of intermediate lags
 
 ---
 
-### 3.3 Comparison to White Noise
-![White Noise](c.png)  
-A simulated white noise process with the same volatility as MSFT is plotted for comparison. White noise has constant variance and no clustering. Visual differences highlight volatility clustering in real returns.
+## 4) Analysis of Time Series
 
----
+- **AR(2) series**: Shows a decaying autocorrelation pattern, typical of autoregressive processes.  
+- **MA(2) series**: ACF cuts off after 2 lags; PACF decays gradually.  
+- **White noise**: No significant autocorrelation; serves as a benchmark.  
+- **MSFT returns**: Mostly resemble white noise, but small deviations (slight autocorrelations) may appear at short lags.  
 
-### 3.4 Distribution of Returns
-![Histogram](d.png)  
-The histogram of returns is roughly bell-shaped but with heavier tails than a normal distribution, indicating higher probability of extreme returns compared to a Gaussian RW.
-
----
-
-### 3.5 Variance vs Horizon $$q$$
-![Variance vs q](e.png)  
-For a RW, the variance of $$q$$-day returns should increase proportionally with $$q$$. MSFT shows approximate linearity, supporting the RW property, though small deviations appear at larger $$q$$.
-
----
-
-### 3.6 Variance Ratio z-statistics
-![VR z-stats](f.png)  
-The VR test compares $$VR(q)$$ to 1. Most z-statistics lie within the ±1.96 band, meaning the RW hypothesis is not rejected for most horizons. A few horizons exceed this threshold, indicating mild autocorrelation.
-
----
-
-### 3.7 Volatility Scaling (MSFT)
-![Vol Scaling MSFT](g.png)  
-Annualized volatility of $$q$$-day returns is scaled by $$\sqrt{q}$$. Under RW, this should be flat across $$q$$. The MSFT plot is mostly flat, confirming the scaling law, with minor deviations at larger horizons.
-
----
-
-### 3.8 Volatility Scaling (Monte Carlo Benchmark)
-![Vol Scaling MC](h.png)  
-In a simulated RW with IID Gaussian returns, volatility scaling is perfectly flat, as theory predicts. This serves as a reference: deviations in the MSFT plot reflect real-world effects, not calculation errors.
-
----
-
-## 4) Interpretation
-
-- **Variance scaling**: Largely consistent with RW theory.  
-- **VR test**: Mostly non-rejection of $$H_0$$, with occasional significant deviations indicating slight autocorrelation.  
-- **Volatility scaling**: Nearly flat, with minor real-world deviations.  
-- **Monte Carlo comparison**: Confirms the methodology matches theoretical expectations.
+Comparison allows us to check if MSFT returns have any **temporal structure**, or if they behave mostly like a Random Walk.
 
 ---
 
 ## 5) Conclusion
 
-From 1988 to 2017, MSFT’s daily log-returns are **mostly consistent** with a Random Walk process:
-- Weak evidence of predictability at some horizons.
-- Scaling laws largely respected.
-- Supports the Weak-Form EMH at the daily frequency.
+- MSFT daily returns are **mostly consistent** with a Random Walk, supporting the Weak-Form Efficient Market Hypothesis.  
+- Minor autocorrelation exists at very short lags, but it is weak and likely not exploitable.  
+- AR and MA simulations provide a reference to visualize how temporal dependencies would look compared to real stock returns.  
 
-Small deviations could be due to market microstructure effects, volatility clustering, or short-term autocorrelation.  
-From a trading perspective, any predictability appears minimal and may not survive transaction costs.
+This analysis combines **empirical Random Walk testing** with **time series modeling** to better understand the statistical properties of Microsoft’s daily returns.
